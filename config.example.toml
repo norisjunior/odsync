@@ -1,0 +1,22 @@
+# Copie para ~/.config/odsync/config.toml e ajuste para sua instalação.
+tenant_id = "SEU_TENANT_ID"
+client_id = "SEU_CLIENT_ID"
+interval = 300
+ignore = ["*.tmp", "*.part", ".*", "~$*"]
+
+[[mapping]]
+name = "files"
+local_dir = "/srv/backup/files"
+remote_dir = "Backup/files"
+recursive = true
+include = ["*"]
+
+[[mapping]]
+name = "databases"
+local_dir = "/srv/backup/databases"
+remote_dir = "Backup/databases"
+recursive = false
+include = ["*.sql.gz"]
+# Ative com 3 somente após validar os uploads e os nomes abaixo.
+retention_days = 0
+retention_patterns = ["{date}-app.sql.gz", "{date}-auth.sql.gz"]
