@@ -1,8 +1,34 @@
 # odsync
 
-Sincronizador de upload de pastas Linux para OneDrive for Business, em Python 3.11+ e `requests`. Terminal, OAuth com PKCE, SQLite e sessões retomáveis para arquivos grandes. Não usa SDK da Microsoft.
+O **odsync** é uma ferramenta de backup por upload unidirecional de servidores Linux para o OneDrive for Business. Foi pensado para rotinas que precisam preservar arquivos documentais e manter dumps diários de bancos de dados com retenção configurável.
 
-Você escolhe os diretórios locais e remotos no TOML. A retenção é opcional e aplicada apenas aos nomes de backups configurados. Arquivos locais nunca são excluídos.
+Seu principal diferencial é reunir o envio dos arquivos e a política de retenção dos dumps no mesmo fluxo:
+
+- **Arquivos assentados:** só considera arquivos para upload quando tamanho e data de modificação permanecem iguais entre duas verificações.
+- **Destinos configuráveis:** mapeia diferentes pastas locais para destinos distintos no OneDrive.
+- **Reutilização do acervo:** a reconciliação registra arquivos remotos iguais e evita seu reenvio.
+- **Retenção por data do backup:** mantém os dumps dos últimos dias pela data no nome e só remove os antigos após confirmar todos os backups recentes esperados.
+- **Código simples de inspecionar e adaptar:** cinco módulos Python e apenas `requests` como dependência externa direta.
+
+Essas regras prontas atendem especialmente à rotina de preservar documentos e manter, por exemplo, três dias de dumps de bancos de dados.
+
+Funciona pelo terminal, com Python 3.11+, OAuth com PKCE, estado em SQLite e sessões retomáveis para arquivos grandes. Diretórios e padrões são definidos no TOML. A retenção é opcional e restrita aos nomes configurados; arquivos locais nunca são excluídos.
+
+## Por que executar o scan duas vezes?
+
+**Um arquivo novo precisa ser observado em dois scans antes do upload.** O primeiro registra tamanho e data de modificação; o segundo envia se esses valores permanecerem iguais. Se mudarem, o arquivo aguarda outra passagem estável. Isso reduz o risco de enviar um arquivo ainda sendo gravado, mas não substitui a geração atômica do backup.
+
+Depois de instalar, configurar e fazer login, execute na pasta do projeto, com o `venv` ativo:
+
+```bash
+python cli.py scan
+sleep 300
+python cli.py scan
+```
+
+O exemplo aguarda cinco minutos entre as passagens e processa todos os mapeamentos. Para limitar a operação, use o mesmo `--mapping NOME` nos dois comandos. É normal o primeiro scan de arquivos novos terminar com `0 upload(s)`; arquivos observados em execuções anteriores já podem ser enviados nessa passagem. Arquivos já registrados e inalterados são pulados.
+
+O cron documentado abaixo já executa os dois scans. O modo `watch` também faz as passagens automaticamente.
 
 ## Instalação
 
