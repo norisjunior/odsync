@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+venv/
+.venv/
+.env
+.env.*
+config.toml
+token.json
+token.*
+*.db
+*.db-*
+*.log
+*.sql
+*.sql.gz
+*.dump
+*.bak
